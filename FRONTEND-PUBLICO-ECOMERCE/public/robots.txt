@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /tienda
+Allow: /producto/
+Allow: /login
+Allow: /registro
+Disallow: /dashboard*
+Disallow: /procesar-compra
+Disallow: /historial*
+
+Sitemap: https://regenievex.com/sitemap.xml

@@ -1,0 +1,158 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Orden Registrada</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            height: max-content;
+        }
+
+        .card {
+            position: relative;
+            margin: 0 auto;
+            width: 600px;
+            max-width: 100%;
+            height: max-content;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Noticeable admin header */
+        .card .part-header {
+            background-color: #2c3e50;
+            color: #ffffff;
+            padding: 30px 40px;
+            text-align: center;
+            border-bottom: 4px solid #e74c3c;
+        }
+
+        .card .part-header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card .part-body {
+            position: relative;
+            width: 100%;
+            padding: 30px 40px;
+        }
+
+        .card .part-body p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .order-details-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+        }
+
+        .order-details-box strong {
+            display: inline-block;
+            width: 130px;
+            color: #2c3e50;
+        }
+
+        .order-details-box .info-row {
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+            color: #333;
+        }
+
+        .btn-admin {
+            display: block;
+            width: max-content;
+            margin: 30px auto 20px;
+            padding: 14px 28px;
+            background-color: #e74c3c;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(231, 76, 60, 0.3);
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-admin:hover {
+            background-color: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .footer {
+            margin: 20px auto 0;
+            width: 600px;
+            max-width: 100%;
+            padding: 20px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="part-header">
+                <h1>🔔 Nueva Orden de Compra</h1>
+                <p style="color: #ecf0f1; font-size: 0.95rem; margin-top: 5px;">Sistema Automático RegeNievex</p>
+            </div>
+
+            <div class="part-body">
+                <p>Hola Administrador,</p>
+                <p>Se acaba de registrar una nueva venta exitosa en la tienda en línea de <strong>RegeNievex</strong>.
+                </p>
+
+                <div class="order-details-box">
+                    <div class="info-row">
+                        <strong>Cliente:</strong> {{nombreCliente}}
+                    </div>
+                    <div class="info-row" style="margin-top: 15px;">
+                        <strong>Productos:</strong>
+                        <div style="margin-top: 5px; color:#555; padding-left: 5px;">{{descripcionCompra}}</div>
+                    </div>
+                </div>
+
+                <p style="text-align: center; margin-top: 25px;">Por favor, ingresa al panel de administración para
+                    gestionar esta orden, preparar el envío y actualizar el estado de la compra.</p>
+
+                <!-- Update this link to the actual Admin Dashboard URL -->
+                <a href="https://admin.clinicanieves.co" class="btn-admin">Ir al Panel de Administración</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Este es un mensaje generado automáticamente por el Servidor E-commerce.</p>
+            <p>Por favor, no respondas a este correo.</p>
+        </div>
+    </div>
+</body>
+
+</html>

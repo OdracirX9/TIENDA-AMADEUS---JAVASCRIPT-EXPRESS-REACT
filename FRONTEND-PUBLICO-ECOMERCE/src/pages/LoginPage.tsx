@@ -1,0 +1,356 @@
+﻿import { useState, useEffect } from 'preact/hooks';
+import { Mail, Lock, ArrowRight, User, Eye, EyeOff, Loader, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-preact';
+import { Link, useNavigate } from 'react-router-dom';
+import { clienteUser } from '../signals';
+import { loginUsuario, registroUsuario } from '../services/usuarioService';
+import { hasLocalCartItems, mergeLocalCartToAccount, clearLocalCart, syncCartFromAPI } from '../signals/cart';
+
+type Tab = 'login' | 'registro';
+
+export function LoginPage() {
+    const navigate = useNavigate();
+
+    // ── Redirect si ya está logueado ──────────────────────────────────────────
+    useEffect(() => {
+        if (clienteUser.value) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [clienteUser.value]);
+
+    // ── Estado de tabs ────────────────────────────────────────────────────────
+    const [tab, setTab] = useState<Tab>('login');
+
+    // ── Campos ────────────────────────────────────────────────────────────────
+    const [nombre, setNombre] = useState('');
+    const [correo, setCorreo] = useState('');
+    const [password, setPassword] = useState('');
+    const [verPassword, setVerPassword] = useState(false);
+
+    // ── Estado UI ─────────────────────────────────────────────────────────────
+    const [cargando, setCargando] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [exito, setExito] = useState<string | null>(null);
+    const [mostrarModalFusion, setMostrarModalFusion] = useState(false);
+
+    const limpiarEstado = () => { setError(null); setExito(null); };
+
+    // ── Handlers ──────────────────────────────────────────────────────────────
+
+    const handleLogin = async (e: Event) => {
+        e.preventDefault();
+        limpiarEstado();
+        if (!correo || !password) { setError('Por favor completa todos los campos.'); return; }
+        setCargando(true);
+        try {
+            const data = await loginUsuario(correo, password);
+            if (data.usuario) clienteUser.value = data.usuario;
+            setExito('¡Sesión iniciada!');
+
+            if (hasLocalCartItems()) {
+                setMostrarModalFusion(true);
+            } else {
+                await syncCartFromAPI();
+                setTimeout(() => navigate('/dashboard'), 1000);
+            }
+        } catch (err: any) {
+            const msg = err?.response?.data?.message || err?.response?.data || 'Credenciales incorrectas.';
+            setError(typeof msg === 'string' ? msg : 'Error al iniciar sesión.');
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    const handleRegistro = async (e: Event) => {
+        e.preventDefault();
+        limpiarEstado();
+        if (!nombre || !correo || !password) { setError('Por favor completa todos los campos.'); return; }
+        if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return; }
+        setCargando(true);
+        try {
+            await registroUsuario(nombre, correo, password);
+            // Redirigir a la página de registro exitoso para indicar al usuario
+            // que revise su bandeja de entrada y confirme su cuenta
+            navigate('/registro-exitoso');
+        } catch (err: any) {
+            const msg = err?.response?.data?.message || err?.response?.data || 'Error al crear la cuenta.';
+            setError(typeof msg === 'string' ? msg : 'Error al registrarse.');
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    const cambiarTab = (t: Tab) => { setTab(t); limpiarEstado(); setNombre(''); setCorreo(''); setPassword(''); };
+
+    const handleFusionar = async () => {
+        setCargando(true);
+        await mergeLocalCartToAccount();
+        setCargando(false);
+        setMostrarModalFusion(false);
+        navigate('/dashboard');
+    };
+
+    const handleDescartar = async () => {
+        setCargando(true);
+        clearLocalCart();
+        await syncCartFromAPI();
+        setCargando(false);
+        setMostrarModalFusion(false);
+        navigate('/dashboard');
+    };
+
+    return (
+        <div class="min-h-[90vh] w-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-white to-brand-50/30 p-6 relative">
+            <div class="w-full max-w-[960px] flex flex-col md:flex-row rounded-3xl overflow-hidden shadow-2xl shadow-slate-900/10 border border-slate-200/70">
+
+                {/* ── Panel izquierdo decorativo ────────────────────────────── */}
+                <div class="hidden md:flex w-5/12 relative bg-gradient-to-br from-[#1e1b4b] to-[#4c1d95] flex-col justify-between p-10 overflow-hidden">
+
+                    {/* Círculos decorativos */}
+                    <div class="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full" />
+                    <div class="absolute bottom-10 -left-16 w-56 h-56 bg-brand-500/10 rounded-full" />
+                    <div class="absolute top-1/2 right-8 w-32 h-32 bg-indigo-400/10 rounded-full" />
+
+                    {/* Logo */}
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-gradient-to-br from-brand-400 to-indigo-400 rounded-2xl flex items-center justify-center shadow-xl shadow-brand-500/30 mb-10">
+                            <ShoppingBag size={22} class="text-white" />
+                        </div>
+                        <h2 class="text-3xl font-black text-white leading-tight mb-4">
+                            {tab === 'login'
+                                ? <>Bienvenido<br /><span class="text-brand-300">de vuelta</span></>
+                                : <>Únete a<br /><span class="text-brand-300">nuestra tienda</span></>
+                            }
+                        </h2>
+                        <p class="text-indigo-200/80 font-medium text-sm leading-relaxed">
+                            {tab === 'login'
+                                ? 'Accede a tu historial de pedidos, direcciones guardadas y ofertas exclusivas para clientes.'
+                                : 'Crea tu cuenta y empieza a disfrutar de envíos gratis, seguimiento de pedidos y mucho más.'
+                            }
+                        </p>
+                    </div>
+
+                    {/* Features */}
+                    <div class="relative z-10 space-y-3">
+                        {['Historial de compras', 'Ofertas exclusivas', 'Seguimiento en tiempo real'].map(f => (
+                            <div key={f} class="flex items-center gap-3">
+                                <div class="w-5 h-5 rounded-full bg-brand-400/20 border border-brand-400/30 flex items-center justify-center shrink-0">
+                                    <CheckCircle size={11} class="text-brand-300" />
+                                </div>
+                                <span class="text-indigo-200/70 text-xs font-medium">{f}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Panel derecho: formulario ─────────────────────────────── */}
+                <div class="flex-1 bg-white p-8 md:p-12 flex flex-col justify-center">
+                    <div class="max-w-md mx-auto w-full">
+
+                        {/* Título mobile */}
+                        <div class="flex items-center gap-3 mb-6 md:hidden">
+                            <img src="/logo-completo-regenievex.webp" alt="RegeNievex Logo" class="h-10 object-contain" />
+                        </div>
+
+                        {/* Tabs */}
+                        <div class="flex bg-slate-100 rounded-2xl p-1 mb-8 gap-1">
+                            {(['login', 'registro'] as Tab[]).map(t => (
+                                <button
+                                    key={t}
+                                    onClick={() => cambiarTab(t)}
+                                    class={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${tab === t
+                                        ? 'bg-white text-slate-900 shadow-sm shadow-slate-900/10'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                >
+                                    {t === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Alerta de error */}
+                        {error && (
+                            <div class="flex items-start gap-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 mb-6 text-sm font-medium">
+                                <AlertCircle size={18} class="shrink-0 mt-0.5" />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        {/* Alerta de éxito */}
+                        {exito && (
+                            <div class="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl p-4 mb-6 text-sm font-medium">
+                                <CheckCircle size={18} class="shrink-0 mt-0.5" />
+                                <span>{exito}</span>
+                            </div>
+                        )}
+
+                        {/* ── FORMULARIO LOGIN ─────────────────────────────── */}
+                        {tab === 'login' && (
+                            <form onSubmit={handleLogin} class="space-y-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-bold text-slate-700">Correo electrónico</label>
+                                    <div class="relative">
+                                        <Mail class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <input
+                                            type="email"
+                                            value={correo}
+                                            onInput={(e) => setCorreo((e.target as HTMLInputElement).value)}
+                                            placeholder="usuario@ejemplo.com"
+                                            disabled={cargando}
+                                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 transition-all disabled:opacity-60"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-bold text-slate-700">Contraseña</label>
+                                    <div class="relative">
+                                        <Lock class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <input
+                                            type={verPassword ? 'text' : 'password'}
+                                            value={password}
+                                            onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
+                                            placeholder="••••••••"
+                                            disabled={cargando}
+                                            class="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 transition-all disabled:opacity-60"
+                                        />
+                                        <button type="button" onClick={() => setVerPassword(v => !v)}
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            {verPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+
+                                <div class="flex justify-end -mt-1">
+                                    <Link
+                                        to="/restablecer-contrasena"
+                                        class="text-xs font-medium text-brand-600 hover:text-brand-500 transition-colors"
+                                    >
+                                        �Olvidaste tu contrase�a?
+                                    </Link>
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={cargando}
+                                    class="w-full h-13 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white rounded-xl font-bold flex items-center justify-center gap-2.5 shadow-lg shadow-brand-500/25 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed py-3.5 mt-2"
+                                >
+                                    {cargando
+                                        ? <><Loader size={18} class="animate-spin" /> Iniciando sesión...</>
+                                        : <>Entrar a mi cuenta <ArrowRight size={18} /></>
+                                    }
+                                </button>
+                            </form>
+                        )}
+
+                        {/* ── FORMULARIO REGISTRO ──────────────────────────── */}
+                        {tab === 'registro' && (
+                            <form onSubmit={handleRegistro} class="space-y-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-bold text-slate-700">Nombre completo</label>
+                                    <div class="relative">
+                                        <User class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <input
+                                            type="text"
+                                            value={nombre}
+                                            onInput={(e) => setNombre((e.target as HTMLInputElement).value)}
+                                            placeholder="Tu nombre"
+                                            disabled={cargando}
+                                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 transition-all disabled:opacity-60"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-bold text-slate-700">Correo electrónico</label>
+                                    <div class="relative">
+                                        <Mail class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <input
+                                            type="email"
+                                            value={correo}
+                                            onInput={(e) => setCorreo((e.target as HTMLInputElement).value)}
+                                            placeholder="usuario@ejemplo.com"
+                                            disabled={cargando}
+                                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 transition-all disabled:opacity-60"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-bold text-slate-700">Contraseña</label>
+                                    <div class="relative">
+                                        <Lock class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <input
+                                            type={verPassword ? 'text' : 'password'}
+                                            value={password}
+                                            onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
+                                            placeholder="Mínimo 6 caracteres"
+                                            disabled={cargando}
+                                            class="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 transition-all disabled:opacity-60"
+                                        />
+                                        <button type="button" onClick={() => setVerPassword(v => !v)}
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            {verPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={cargando}
+                                    class="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white rounded-xl font-bold flex items-center justify-center gap-2.5 shadow-lg shadow-brand-500/25 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed py-3.5 mt-2"
+                                >
+                                    {cargando
+                                        ? <><Loader size={18} class="animate-spin" /> Creando cuenta...</>
+                                        : <>Crear mi cuenta <ArrowRight size={18} /></>
+                                    }
+                                </button>
+
+                                <p class="text-xs text-slate-400 text-center font-medium">
+                                    Al registrarte aceptas nuestros{' '}
+                                    <span class="text-brand-600 cursor-pointer hover:underline">Términos y Condiciones</span>
+                                </p>
+                            </form>
+                        )}
+
+                    </div>
+                </div>
+
+            </div>
+
+            {/* Modal de Fusión de Carrito */}
+            {mostrarModalFusion && (
+                <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                    <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full animate-in fade-in zoom-in duration-200">
+                        <div class="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-brand-600">
+                            <ShoppingBag size={32} />
+                        </div>
+                        <h3 class="text-2xl font-black text-center text-slate-800 mb-3">
+                            ¡Tienes productos guardados!
+                        </h3>
+                        <p class="text-slate-500 text-center mb-8 leading-relaxed">
+                            Detectamos que agregaste productos a tu carrito antes de iniciar sesión. ¿Deseas fusionarlos con tu cuenta o prefieres descartarlos?
+                        </p>
+                        <div class="flex flex-col gap-3">
+                            <button
+                                onClick={handleFusionar}
+                                disabled={cargando}
+                                class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg shadow-brand-500/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {cargando ? <Loader size={18} class="animate-spin" /> : 'Fusionar a mi cuenta'}
+                            </button>
+                            <button
+                                onClick={handleDescartar}
+                                disabled={cargando}
+                                class="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                {cargando ? <Loader size={18} class="animate-spin" /> : 'Descartar carrito temporal'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

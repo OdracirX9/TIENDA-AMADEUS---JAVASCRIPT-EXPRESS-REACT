@@ -1,0 +1,209 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificación de Envío RegeNievex</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f6f9;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            height: max-content;
+        }
+
+        .card {
+            position: relative;
+            margin: 0 auto;
+            width: 600px;
+            max-width: 100%;
+            height: max-content;
+            background-color: rgb(244, 255, 255);
+            border-radius: 2rem;
+            overflow: hidden;
+            border: 1px solid rgb(230, 230, 230);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .card .part2 {
+            position: relative;
+            width: 100%;
+            background-color: rgb(238, 250, 251);
+            padding: 40px 50px;
+        }
+
+        .card .part2 h1 {
+            font-size: 1.8rem;
+            color: rgba(4, 212, 231, 1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .card .part2 .content {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .card .part2 .content p {
+            font-size: 1.1rem;
+            padding: 10px 0px;
+            line-height: 1.5;
+            color: rgb(80, 80, 80);
+        }
+
+        .shipping-card {
+            width: 100%;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e0e0e0;
+        }
+
+        .shipping-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #04d4e7;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .detail-row {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .detail-row strong {
+            color: #333;
+            display: block;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .highlight-msg {
+            text-align: center;
+            font-weight: bold;
+            color: rgb(0, 150, 165);
+            margin-top: 30px;
+            padding: 15px;
+            background-color: rgba(4, 212, 231, 0.1);
+            border-radius: 10px;
+            border: 1px dashed rgba(4, 212, 231, 0.5);
+        }
+
+        .footer {
+            margin: 20px auto 0;
+            width: 600px;
+            max-width: 100%;
+            padding: 20px;
+            border-radius: 25px;
+            background-color: rgb(255, 239, 249);
+            border: 1px solid rgb(230, 230, 230);
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgb(150, 150, 150);
+            margin-bottom: 15px;
+        }
+
+        .footer .redes {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card-redes {
+            text-decoration: none;
+            color: rgb(150, 150, 150);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .card-redes img {
+            display: block;
+            width: 35px;
+            margin: 0 auto 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="part2">
+                <h1>🚚 ¡Tu pedido va en camino, {{nombreUsuario}}!</h1>
+                <div class="content">
+                    <p>Te informamos que tu orden de <strong>RegeNievex</strong> ha sido despachada y está en proceso de
+                        entrega.</p>
+
+                    <div class="shipping-card">
+                        <h3>📦 Productos Enviados</h3>
+                        <div class="detail-row">
+                            {{descripcionProductos}}
+                        </div>
+                    </div>
+
+                    <div class="shipping-card">
+                        <h3>📍 Dirección de Entrega</h3>
+                        <div class="detail-row">
+                            <strong>Dirección:</strong>
+                            {{direccion}}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Ciudad / Departamento:</strong>
+                            {{ciudad}}, {{departamento}}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Detalles Adicionales:</strong>
+                            {{descripcionUbicacion}}
+                        </div>
+                    </div>
+
+                    <div class="highlight-msg">
+                        ¡Esperamos que disfrutes de tu compra muy pronto!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Conócenos en nuestras redes</p>
+            <div class="redes">
+                <a target="_blank" href="https://www.facebook.com/clinicanieves" class="card-redes">
+                    <img src="https://laser-lab-react.vercel.app/filesExternals/facebook.png" alt="Facebook">
+                    <span>Facebook</span>
+                </a>
+                <a target="_blank" href="https://www.instagram.com/clinicanievesyopal/" class="card-redes">
+                    <img src="https://laser-lab-react.vercel.app/filesExternals/instagram.png" alt="Instagram">
+                    <span>Instagram</span>
+                </a>
+                <a target="_blank" href="https://api.whatsapp.com/send/?phone=573214466552&text&app_absent=0"
+                    class="card-redes">
+                    <img src="https://laser-lab-react.vercel.app/filesExternals/whatsapp.png" alt="Whatsapp">
+                    <span>Whatsapp</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

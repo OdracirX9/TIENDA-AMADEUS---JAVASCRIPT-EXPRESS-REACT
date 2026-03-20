@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "nombre":"Clínica Nieves",
+        "subdominio": "clinicanieves",
+        "img":"https://clinicanieves.co/assets/logosPaginas/clinicanieves.png"
+    },
+    {
+        "id": 2,
+        "nombre":"LASER LAB - Clínica Nieves",
+        "subdominio": "laserlab",
+        "img":"https://clinicanieves.co/assets/logosPaginas/laserlab.png"
+    },
+    {
+        "id": 3,
+        "nombre":"TITANS - Clínica Nieves",
+        "subdominio": "titans",
+        "img":"https://clinicanieves.co/assets/logosPaginas/titans.png"
+    },
+    {
+        "id": 4,
+        "nombre":"CELL STEMS - Clínica Nieves",
+        "subdominio": "cellstems",
+        "img":"https://clinicanieves.co/assets/logosPaginas/cells.png"
+    }
+]

@@ -1,0 +1,20 @@
+[
+    
+    {
+        "nombre":"Ivan Perez",
+        "correo":"amadeussystemx9@gmail.com",
+        "especialidades":[1,2,3,4]
+    },
+
+    {
+        "nombre":"Gerencia",
+        "correo":"gerencia@clinicanieves.co",
+        "especialidades":[1,2,3,4]
+    },
+
+    {
+        "nombre":"Marketing",
+        "correo":"marketing@clinicanieves.co",
+        "especialidades":[1,2,3,4]
+    }
+]
